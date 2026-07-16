@@ -33,7 +33,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], # Allows all origins (perfect for local development)
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"], # Allows all methods (GET, POST, etc.)
     allow_headers=["*"],
 )
@@ -221,3 +221,46 @@ def create_manual_recipe(recipe_in: ManualRecipeCreate, db: Session = Depends(ge
     db.commit()
     db.refresh(new_recipe)
     return new_recipe
+
+# Add this data model near the top with your others
+class RecipeUpdate(BaseModel):
+    title: str
+    ingredients: list
+    instructions: list
+
+# Add this route to handle the updates
+@app.put("/api/recipes/{recipe_id}")
+def update_recipe(recipe_id: str, recipe_in: RecipeUpdate, db: Session = Depends(get_db)):
+    current_user = get_or_create_default_user(db)
+    recipe = db.query(SavedRecipe).filter(
+        SavedRecipe.id == recipe_id, 
+        SavedRecipe.user_id == current_user.id
+    ).first()
+    
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+        
+    # Overwrite the title
+    recipe.title = recipe_in.title
+    
+    # Grab the existing JSON dictionary to update it safely
+    updated_data = recipe.recipe_data.copy()
+    
+    # We must ensure the strings are formatted back into dictionaries 
+    # so they don't break the frontend UI when you view the recipe later
+    formatted_ingredients = [
+        {"quantity_fraction": "", "unit": "", "name": ing} if isinstance(ing, str) else ing
+        for ing in recipe_in.ingredients
+    ]
+    
+    updated_data["ingredients"] = formatted_ingredients
+    updated_data["instructions"] = recipe_in.instructions
+    
+    recipe.recipe_data = updated_data
+    
+    # Required for SQLAlchemy to recognize a change inside a JSONB column
+    from sqlalchemy.orm.attributes import flag_modified
+    flag_modified(recipe, "recipe_data")
+    
+    db.commit()
+    return {"status": "success", "message": "Recipe updated successfully."}
