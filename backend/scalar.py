@@ -1,8 +1,16 @@
 import re
+import math
 from fractions import Fraction
 from typing import Dict, Any, Tuple
 
 class FractionScalar:
+    SCALING_TYPES = {"continuous", "discrete", "fractional"}
+    DISCRETE_TERMS = {
+        "egg", "eggs", "clove", "cloves", "banana", "bananas", "apple", "apples",
+        "avocado", "avocados", "lemon", "lemons", "lime", "limes", "onion", "onions",
+        "potato", "potatoes", "tomato", "tomatoes", "tortilla", "tortillas",
+    }
+    FRACTIONAL_TERMS = {"loaf", "loaves"}
     # Our Source of Truth for valid kitchen measurements
     STANDARD_UNITS = [
         "cup", "cups", "c",
@@ -77,6 +85,50 @@ class FractionScalar:
         # If no standard unit is found (e.g., "2 large eggs"), return blank unit and the whole string
         return "", clean_text
 
+    def classify_ingredient(self, unit: str, name: str) -> str:
+        """Choose the safest scaling behavior from structured ingredient data."""
+        normalized_unit = unit.lower().strip()
+        normalized_name = name.lower()
+        words = set(re.findall(r"[a-z]+", normalized_name))
+
+        # A measurable unit always takes precedence (for example, a cup of eggs).
+        if normalized_unit in self.STANDARD_UNITS:
+            return "continuous"
+        if words & self.FRACTIONAL_TERMS:
+            return "fractional"
+        if words & self.DISCRETE_TERMS:
+            return "discrete"
+        return "continuous"
+
+    def scale_quantity(self, quantity: float, scale_factor: float, scaling_type: str) -> float:
+        scaled_quantity = quantity * scale_factor
+        if scaling_type == "discrete":
+            return float(math.ceil(scaled_quantity))
+        if scaling_type == "fractional":
+            return round(scaled_quantity * 4) / 4
+        return round(scaled_quantity, 2)
+
+    def normalize_ingredient(self, ingredient: Dict[str, Any]) -> Dict[str, Any]:
+        """Preserve a selected category or classify legacy ingredient records."""
+        normalized = ingredient.copy()
+        scaling_type = normalized.get("scaling_type")
+        if scaling_type not in self.SCALING_TYPES:
+            scaling_type = self.classify_ingredient(
+                str(normalized.get("unit", "")),
+                str(normalized.get("name", "")),
+            )
+        normalized["scaling_type"] = scaling_type
+        base_quantity = normalized.get("base_quantity_decimal")
+        if not isinstance(base_quantity, (int, float)):
+            decimal_quantity = normalized.get("quantity_decimal")
+            if isinstance(decimal_quantity, (int, float)) and decimal_quantity > 0:
+                base_quantity = decimal_quantity
+            else:
+                base_quantity = self.parse_quantity(str(normalized.get("quantity_fraction", "")))
+        normalized["base_quantity_decimal"] = float(base_quantity)
+        normalized["manual_overridden"] = bool(normalized.get("manual_overridden", False))
+        return normalized
+
     def scale_ingredient(self, ingredient_string: str, scale_factor: float) -> Dict[str, Any]:
         """
         The main worker: takes a raw string, extracts the math, separates the unit,
@@ -88,8 +140,11 @@ class FractionScalar:
             return {
                 "name": ingredient_string.strip(),
                 "quantity_decimal": 0.0,
+                "base_quantity_decimal": 0.0,
                 "quantity_fraction": "",
-                "unit": ""
+                "unit": "",
+                "scaling_type": self.classify_ingredient("", ingredient_string),
+                "manual_overridden": False,
             }
 
         # Find where the number ends so we can parse the rest of the string
@@ -99,13 +154,17 @@ class FractionScalar:
         # Extract the unit and the clean ingredient name
         unit, name = self.parse_unit_and_name(text_without_number)
 
-        scaled_decimal = original_qty * scale_factor
+        scaling_type = self.classify_ingredient(unit, name)
+        scaled_decimal = self.scale_quantity(original_qty, scale_factor, scaling_type)
         
         return {
             "name": name.capitalize(), # Capitalize for a cleaner UI
-            "quantity_decimal": round(scaled_decimal, 2),
+            "quantity_decimal": scaled_decimal,
+            "base_quantity_decimal": original_qty,
             "quantity_fraction": self.format_fraction(scaled_decimal),
-            "unit": unit
+            "unit": unit,
+            "scaling_type": scaling_type,
+            "manual_overridden": False,
         }
 
 # --- Quick Local Sandbox Test ---
