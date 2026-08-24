@@ -15,7 +15,13 @@ rejects or falls back from invalid input, unsupported conversions, missing data,
 and other error conditions. Do not commit intentionally failing tests to the
 main suite; a red suite should indicate a regression that needs attention.
 
-The first unit suite covers the scaling engine. Future folders can add:
+Current coverage includes:
+
+- `tests/unit/`: recipe scaling, conversions, and legacy ingredient normalization.
+- `tests/integration/`: authenticated API request contracts and signed-out fallbacks.
+- `tests/security/`: Google OAuth callback integrity, token/session validation, duplicate callbacks, and cancelled sign-in handling.
+
+Future folders can add:
 
 - `tests/integration/` for API and authenticated recipe workflows.
 - `tests/components/` for React Native interaction and accessibility tests.

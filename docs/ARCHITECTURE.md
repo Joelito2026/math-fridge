@@ -166,7 +166,7 @@ Private objects prevent raw public bucket access and allow ownership/publication
 | --- | --- |
 | Unit | Quantity parsing, ingredient classification, rounding, conversions, atomic scaling, legacy normalization |
 | Frontend integration | Auth headers, Vault fallback, dietary query encoding, update/delete contracts, bookmark authorization |
-| Backend | Existing scalar tests; broader route/database fixtures remain a future enhancement |
+| Backend | Scaling plus offline route-level authorization tests for private/public recipe access and ownership-scoped mutations; broader database fixtures remain a future enhancement |
 | End-to-end | Repeatable manual Android, iOS, and web smoke checklist |
 
 See [Setup and Deployment](SETUP.md) for commands and [the frontend test guide](../frontend/tests/README.md) for the Jest workflow.

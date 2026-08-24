@@ -106,7 +106,7 @@ npm test -- --verbose
 npm run test:coverage
 ```
 
-The current automated frontend baseline contains **47 passing tests** across scaling/unit behavior and mocked API integration contracts. The scaling engine currently has **93.75% line coverage**. A repeatable Android, iOS, and web smoke checklist is available at [frontend/tests/e2e/manual-smoke-checklist.md](frontend/tests/e2e/manual-smoke-checklist.md).
+The current automated baseline contains **56 passing frontend tests** across scaling behavior, authenticated API contracts, and social sign-in integrity, plus **10 passing backend tests** for scaling and recipe-access authorization. The scaling engine currently has **93.75% line coverage**. A repeatable Android, iOS, and web smoke checklist is available at [frontend/tests/e2e/manual-smoke-checklist.md](frontend/tests/e2e/manual-smoke-checklist.md).
 
 ## Documentation
 

@@ -210,10 +210,10 @@ npm run test:coverage
 
 The HTML coverage report is written to `frontend/coverage/lcov-report/index.html` and is ignored by Git.
 
-Backend scalar tests can be run from `backend/` with its virtual environment active:
+Backend scaling and authorization tests can be run from `backend/` with its virtual environment active:
 
 ```bash
-python -m unittest test_scalar.py -v
+python -m unittest test_scalar.py test_recipe_access.py -v
 ```
 
 ## 5. Stop and restart
