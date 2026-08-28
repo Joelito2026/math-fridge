@@ -40,5 +40,5 @@ crashing, corrupting data, or leaving navigation stuck.
 ## Release record
 
 | Date | Platform/device | App build | Tester | Result | Notes |
-| --- | --- | --- | --- | --- | --- |
-| | | | | | |
+| ---- | --------------- | --------- | ------ | ------ | ----- |
+|      |                 |           |        |        |       |

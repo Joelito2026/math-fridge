@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "README.md",
+                "file": "docs/SETUP.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "SETUP"
             }
           }
         ]
@@ -41,7 +41,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
@@ -186,6 +188,12 @@
   "active": "a6f9045c5aad4dc1",
   "lastOpenFiles": [
     "docs/ARCHITECTURE.md",
-    "docs/SETUP.md"
+    "docs/SETUP.md",
+    "frontend/tests/README.md",
+    "frontend/CLAUDE.md",
+    "frontend/README.md",
+    "README.md",
+    "frontend/AGENTS.md",
+    "frontend/tests/e2e/manual-smoke-checklist.md"
   ]
 }
